@@ -1,17 +1,13 @@
-public abstract class Player
-{
+public abstract class Player {
     protected char symbol;
 
-    public Player(char c)
-    {
-        if(c == 'X' || c == 'O')
-            this.symbol = c;
+    public Player(char symbol) {
+        this.symbol = symbol;
     }
 
-    public char getSymbol()
-    {
+    public char getSymbol() {
         return (this.symbol);
     }
 
-    public abstract int setIndex();
+    public abstract int setMove(Board board);
 }

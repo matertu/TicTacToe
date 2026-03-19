@@ -1,131 +1,194 @@
-public class Board
-{
-    public char[][] board = new char[3][3];
+public class Board {
+    public int size;
+    private char[][] board;
 
-    public Board()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-                board[i][j] = ' ';
+    public Board(int n) {
+        this.size = n;
+        this.board = new char[this.size][this.size];
+        clear();
+    }
+
+    public int getSize() {
+        return (this.size);
+    }
+
+    public int getMaxPosition() {
+        return (this.size * this.size);
+    }
+
+    public void clear() {
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                this.board[i][j] = ' ';
+            }
         }
     }
 
-    public void reset()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-                board[i][j] = ' ';
-        }
+    public char getSymbol(int i, int j) {
+        return (board[i][j]);
     }
 
-    public void print()
-    {
-        for (int i = 0; i < 3; i++)
-        {
+    public void print() {
+        for (int i = 0; i < this.size; i++) {
             System.out.printf("  ");
-            for (int j = 0; j < 3; j++)
-            {
-                char c =  board[i][j];
-                if(c == 'X')
+
+            for (int j = 0; j < this.size; j++) {
+                char c = board[i][j];
+
+                if (c == 'X') {
                     System.out.print(Utils.red(" X "));
-                else if(c == 'O')
+                } else if (c == 'O') {
                     System.out.print(Utils.blue(" O "));
-                else
-                    System.out.print(Utils.blue("   "));
+                } else {
+                    System.out.print("   ");
+                }
 
-
-                if (j < 2) {
+                if (j < this.size - 1) {
                     System.out.print("|");
                 }
             }
 
             System.out.println();
+            System.out.printf("  ");
 
-            if (i < 2) {
-                System.out.println("  ---+---+---");
+            if (i < this.size - 1) {
+                for (int k = 1; k <= (this.size * 4 - 1); k++) {
+                    if (k % 4 == 0) {
+                        System.out.print("+");
+                    } else {
+                        System.out.print("-");
+                    }
+                }
+                System.out.println();
             }
         }
         System.out.println();
     }
 
-    public boolean makeMove(int num, char symbol)
-    {
-        int index[] = Utils.transformIndex(num);
+    public boolean makeMove(int num, char symbol) {
+        int[] index = Utils.positionToIndex(num, this.size);
 
-        int row = index[0];
-        int column = index[1];
-
-        if(row > 2 || row < 0 || column > 2 || column < 0)
-            return (false);
-
-        else if(this.board[row][column] == ' ')
-        {
-            this.board[row][column] = symbol;
+        if (this.board[index[0]][index[1]] == ' ') {
+            this.board[index[0]][index[1]] = symbol;
             return (true);
         }
-
         return (false);
     }
 
-    public boolean isFull()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-                if (board[i][j] == ' ')
+    public void undoMove(int num) {
+        int[] index = Utils.positionToIndex(num, this.size);
+
+        if (this.board[index[0]][index[1]] != ' ') {
+            this.board[index[0]][index[1]] = ' ';
+        }
+    }
+
+    public boolean isFull() {
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                if (board[i][j] == ' ') {
                     return (false);
+                }
+            }
         }
         return (true);
     }
 
-    public char checkWinner()
-    {
+    public char checkWinner() {
         char isWinner;
 
         isWinner = verifyColumn();
-        if(isWinner != '\0')
+        if (isWinner != '\0') {
             return (isWinner);
+        }
 
         isWinner = verifyRow();
-        if(isWinner != '\0')
+        if (isWinner != '\0') {
             return (isWinner);
+        }
 
-        isWinner = verifyDiagonal();
-        if(isWinner != '\0')
+        isWinner = verifyPrimaryDiagonal();
+        if (isWinner != '\0') {
             return (isWinner);
+        }
+
+        isWinner = verifySecondaryDiagonal();
+        if (isWinner != '\0') {
+            return (isWinner);
+        }
 
         return ('\0');
     }
 
-    private char verifyRow()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            if(board[i][0] != ' ' && board[i][1] == board[i][0] && board[i][2] == board[i][0])
-                return (board[i][0]);
+    private char verifyColumn() {
+        for (int j = 0; j < this.size; j++) {
+            char ref = board[0][j];
+            if (ref == ' ') {
+                continue;
+            }
+            
+            int cont = 0;
+            for (int i = 0; i < this.size; i++) { 
+                if (board[i][j] == ref) {
+                    cont++;
+                } else {
+                    break;
+                }
+            }
+            if (cont == this.size) {
+                return (ref);
+            }
         }
         return ('\0');
     }
 
-    private char verifyColumn()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            if(board[0][i] != ' ' && board[1][i] == board[0][i] && board[2][i] == board[0][i])
-                return (board[0][i]);
+    private char verifyRow() {
+        for (int i = 0; i < this.size; i++) {
+            char ref = board[i][0];
+            if (ref == ' ') {
+                continue;
+            }
+            
+            int cont = 0;
+            for (int j = 0; j < this.size; j++) { 
+                if (board[i][j] == ref) {
+                    cont++;
+                } else {
+                    break;
+                }
+            }
+            if (cont == this.size) {
+                return (ref);
+            }
         }
         return ('\0');
     }
 
-    private char verifyDiagonal()
-    {
-        if(board[0][0] != ' ' && board[1][1] == board[0][0] && board[2][2] == board[1][1])
-            return (board[0][0]);
-        else if(board[0][2] != ' ' && board[1][1] == board[0][2] && board[2][0] == board[1][1])
-            return (board[0][2]);
-        return ('\0');
+    private char verifyPrimaryDiagonal() {
+        char ref = board[0][0];
+        if (ref == ' ') {
+            return ('\0');
+        }
+
+        for (int i = 0; i < this.size; i++) {
+            if (board[i][i] != ref) {
+                return ('\0');
+            }
+        }
+        return (ref);
+    }
+
+    private char verifySecondaryDiagonal() {
+        char ref = board[0][this.size - 1];
+        if (ref == ' ') {
+            return ('\0');
+        }
+
+        for (int i = 0; i < this.size; i++) {
+            if (board[i][this.size - 1 - i] != ref) {
+                return ('\0');
+            }
+        }
+        return (ref);
     }
 }
-
